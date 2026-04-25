@@ -1,227 +1,454 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Clock, 
-  Tag, 
-  CheckCircle2, 
-  ChevronRight, 
-  ChevronLeft, 
-  Smartphone, 
-  BarChart3,
-  UserCheck
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estrategia de Adopción - App Móvil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased pb-12">
+    <!-- Chosen Palette: Warm Neutrals & Slate (slate-50 background, slate-800 text, blue-600 accents, amber-500 for alerts) -->
+    <!-- Application Structure Plan: Executive Dashboard layout designed to move from Problem Definition (Current Metrics) to Diagnosis (Friction Points), and finally to Actionable Solutions (Interactive Simulator & Strategy Tabs). This facilitates a clear understanding of why the app is failing and how to fix it interactively, moving the user from awareness to strategic planning. -->
+    <!-- Visualization & Content Choices: Current state uses a Doughnut Chart (Chart.js) to show the stark contrast in adoption. Friction points use responsive CSS grid cards. Solutions use a Vanilla JS Tabbed interface to organize text efficiently. The impact simulator uses a Line Chart (Chart.js) linked to a range slider to demonstrate the theoretical impact of UX improvements on adoption rates over time. NO SVG used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
-const App = () => {
-  const [step, setStep] = useState(0); // 0: Intro, 1-4: Questions, 5: Results
-  const [answers, setAnswers] = useState([]);
-  const [direction, setDirection] = useState('next');
-
-  const questions = [
-    {
-      id: 1,
-      text: "¿Si tuvieras que elegir una mejora prioritaria en tus trámites actuales, cuál preferirías?",
-      options: [
-        { id: 'a', text: "Recibir una respuesta o resolución en menos de 10 minutos.", type: 'time', icon: <Clock className="w-5 h-5" /> },
-        { id: 'b', text: "Acceder a un catálogo de beneficios y ahorros exclusivos por mi participación.", type: 'money', icon: <Tag className="w-5 h-5" /> }
-      ]
-    },
-    {
-      id: 2,
-      text: "¿Al realizar un reporte o solicitud técnica, qué es lo que más valoras?",
-      options: [
-        { id: 'a', text: "No tener que redactar correos y poder hacerlo con un solo botón.", type: 'time', icon: <Smartphone className="w-5 h-5" /> },
-        { id: 'b', text: "Que mi cumplimiento con los reportes me genere puntos o créditos para futuros servicios.", type: 'money', icon: <BarChart3 className="w-5 h-5" /> }
-      ]
-    },
-    {
-      id: 3,
-      text: "¿Sobre la nueva aplicación móvil, cuál de estas frases describe mejor tu interés?",
-      options: [
-        { id: 'a', text: "Me interesa si me ayuda a terminar mis gestiones más rápido para volver a mis labores.", type: 'time', icon: <Clock className="w-5 h-5" /> },
-        { id: 'b', text: "Me interesa si me ofrece convenios y precios especiales que no consigo de otra forma.", type: 'money', icon: <Tag className="w-5 h-5" /> }
-      ]
-    },
-    {
-      id: 4,
-      text: "¿Qué te motivaría más a completar un proceso de registro digital?",
-      options: [
-        { id: 'a', text: "Saber que una vez registrado, nunca más tendré que esperar 24 horas por una validación.", type: 'time', icon: <UserCheck className="w-5 h-5" /> },
-        { id: 'b', text: "Recibir un cupón de bienvenida o descuento inmediato tras la activación de mi cuenta.", type: 'money', icon: <Tag className="w-5 h-5" /> }
-      ]
-    }
-  ];
-
-  const handleAnswer = (option) => {
-    const newAnswers = [...answers];
-    newAnswers[step - 1] = option;
-    setAnswers(newAnswers);
-    
-    setTimeout(() => {
-      if (step < questions.length) {
-        setDirection('next');
-        setStep(step + 1);
-      } else {
-        setStep(step + 1);
-      }
-    }, 300);
-  };
-
-  const calculateResults = () => {
-    const timeCount = answers.filter(a => a.type === 'time').length;
-    const moneyCount = answers.filter(a => a.type === 'money').length;
-    
-    if (timeCount > moneyCount) return { 
-      profile: 'Eficiencia y Tiempo', 
-      desc: 'Tu prioridad principal es la agilidad. Valorarías procesos automáticos y respuestas inmediatas.',
-      color: 'text-blue-600',
-      bg: 'bg-blue-50'
-    };
-    if (moneyCount > timeCount) return { 
-      profile: 'Incentivos y Ahorro', 
-      desc: 'Tu prioridad es el valor tangible. Te motivan los beneficios económicos y recompensas por tu lealtad.',
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50'
-    };
-    return { 
-      profile: 'Perfil Mixto', 
-      desc: 'Valoras tanto el ahorro de tiempo como los beneficios económicos por igual.',
-      color: 'text-purple-600',
-      bg: 'bg-purple-50'
-    };
-  };
-
-  const progress = (step / (questions.length + 1)) * 100;
-
-  return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans text-slate-900">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 transition-all duration-500">
-        
-        {/* Progress Bar */}
-        {step > 0 && step <= questions.length && (
-          <div className="w-full h-2 bg-slate-100">
-            <div 
-              className="h-full bg-blue-500 transition-all duration-500 ease-out"
-              style={{ width: `${(step / questions.length) * 100}%` }}
-            />
-          </div>
-        )}
-
-        <div className="p-8">
-          {/* Welcome Screen */}
-          {step === 0 && (
-            <div className="text-center space-y-6 animate-in fade-in zoom-in duration-500">
-              <div className="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6 text-blue-600">
-                <Smartphone size={40} />
-              </div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
-                Mejorando nuestra Experiencia Digital
-              </h1>
-              <p className="text-slate-500 text-lg leading-relaxed">
-                Queremos que nuestras herramientas trabajen para ti. Responde 4 preguntas rápidas para ayudarnos a priorizar.
-              </p>
-              <button 
-                onClick={() => setStep(1)}
-                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold text-lg hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-200"
-              >
-                Comenzar encuesta
-                <ChevronRight size={20} />
-              </button>
+    <header class="bg-white shadow-sm border-b border-slate-200 py-6 mb-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900">📊 Reporte de Adopción Digital</h1>
+                <p class="text-slate-500 mt-1">Análisis de la situación actual y estrategias de reactivación para la App de Agremiados.</p>
             </div>
-          )}
-
-          {/* Question Screen */}
-          {step > 0 && step <= questions.length && (
-            <div key={step} className="space-y-8 animate-in slide-in-from-right-8 duration-300">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-semibold text-blue-600 uppercase tracking-wider bg-blue-50 px-3 py-1 rounded-full">
-                  Pregunta {step} de {questions.length}
-                </span>
-                {step > 1 && (
-                  <button 
-                    onClick={() => setStep(step - 1)}
-                    className="text-slate-400 hover:text-slate-600 flex items-center gap-1 text-sm transition-colors"
-                  >
-                    <ChevronLeft size={16} /> Volver
-                  </button>
-                )}
-              </div>
-              
-              <h2 className="text-2xl font-bold text-slate-800 leading-tight">
-                {questions[step - 1].text}
-              </h2>
-
-              <div className="space-y-4">
-                {questions[step - 1].options.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => handleAnswer(option)}
-                    className={`w-full p-5 text-left rounded-2xl border-2 transition-all flex items-start gap-4 group ${
-                      answers[step-1]?.id === option.id 
-                        ? 'border-blue-500 bg-blue-50 shadow-md' 
-                        : 'border-slate-100 hover:border-blue-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    <div className={`mt-0.5 p-2 rounded-xl transition-colors ${
-                      answers[step-1]?.id === option.id ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-500'
-                    }`}>
-                      {option.icon}
-                    </div>
-                    <span className={`text-lg font-medium leading-snug ${
-                      answers[step-1]?.id === option.id ? 'text-blue-700' : 'text-slate-700'
-                    }`}>
-                      {option.text}
-                    </span>
-                  </button>
-                ))}
-              </div>
+            <div class="hidden md:block text-right">
+                <span class="bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-amber-200">Estado: Crítico</span>
+                <p class="text-sm text-slate-400 mt-1">Última actualización: Abril 2026</p>
             </div>
-          )}
-
-          {/* Results Screen */}
-          {step > questions.length && (
-            <div className="text-center space-y-8 animate-in fade-in zoom-in duration-700">
-              <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 text-emerald-600">
-                <CheckCircle2 size={40} />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-slate-800">¡Muchas gracias!</h2>
-                <p className="text-slate-500">Tus respuestas han sido recibidas.</p>
-              </div>
-
-              <div className={`p-6 rounded-3xl ${calculateResults().bg} border border-opacity-50 space-y-3`}>
-                <p className="text-sm font-bold uppercase tracking-widest text-slate-400">Tu perfil identificado:</p>
-                <h3 className={`text-2xl font-black ${calculateResults().color}`}>
-                  {calculateResults().profile}
-                </h3>
-                <p className="text-slate-600 leading-relaxed">
-                  {calculateResults().desc}
-                </p>
-              </div>
-
-              <button 
-                onClick={() => {
-                  setStep(0);
-                  setAnswers([]);
-                }}
-                className="w-full py-4 border-2 border-slate-100 text-slate-500 rounded-2xl font-bold hover:bg-slate-50 transition-all"
-              >
-                Reiniciar encuesta
-              </button>
-              
-              <p className="text-xs text-slate-400 italic">
-                Sus respuestas nos ayudan a construir una asociación más fuerte.
-              </p>
-            </div>
-          )}
         </div>
-      </div>
-      
-      {/* Footer Branding */}
-      <div className="fixed bottom-6 text-slate-400 text-sm font-medium flex items-center gap-2">
-        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-        Soporte Digital Agremiados
-      </div>
-    </div>
-  );
-};
+    </header>
 
-export default App;
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+
+        <section id="situacion-actual" class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">1. Panorama Actual de Adopción</h2>
+                <p class="text-slate-600 leading-relaxed">
+                    Esta sección presenta los indicadores clave de rendimiento (KPIs) relacionados con el lanzamiento de la aplicación móvil hace 4 meses. Su propósito es visualizar la brecha entre el universo total de usuarios potenciales y los usuarios activos reales, estableciendo la magnitud del problema de fondo: una tasa de adopción insostenible frente a la inversión realizada.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                <div class="lg:col-span-1 space-y-4">
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-slate-500 text-sm font-semibold uppercase tracking-wider">Usuarios Registrados</h3>
+                            <span class="text-2xl">👥</span>
+                        </div>
+                        <p class="text-4xl font-black text-slate-800 mt-2">400</p>
+                        <p class="text-sm text-amber-600 mt-1 font-medium">Solo 20% del total esperado</p>
+                    </div>
+
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-slate-500 text-sm font-semibold uppercase tracking-wider">Universo Total</h3>
+                            <span class="text-2xl">🌐</span>
+                        </div>
+                        <p class="text-4xl font-black text-slate-800 mt-2">2,000</p>
+                        <p class="text-sm text-slate-500 mt-1">Agremiados activos</p>
+                    </div>
+
+                    <div class="bg-amber-50 p-5 rounded-xl border border-amber-100">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-amber-800 text-sm font-semibold uppercase tracking-wider">Tiempo de Verificación</h3>
+                            <span class="text-2xl">⏳</span>
+                        </div>
+                        <p class="text-3xl font-black text-amber-600 mt-2">24 - 48 hrs</p>
+                        <p class="text-sm text-amber-700 mt-1 font-medium">Principal cuello de botella</p>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-slate-50 p-6 rounded-xl border border-slate-100">
+                    <h3 class="text-center font-semibold text-slate-700 mb-4">Distribución de Agremiados</h3>
+                    <div class="chart-container">
+                        <canvas id="adoptionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="diagnostico-friccion" class="space-y-6">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">2. Análisis de Puntos de Fricción</h2>
+                <p class="text-slate-600 leading-relaxed mb-6">
+                    Aquí se desglosan las causas fundamentales que generan rechazo o abandono en el uso de la aplicación. Comprender estos puntos de dolor es crucial, ya que explican por qué la inversión tecnológica actual está en riesgo y por qué los usuarios prefieren mantener sus métodos tradicionales (correos electrónicos).
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-6 bg-red-50 rounded-xl border border-red-100 transition hover:-translate-y-1 hover:shadow-md cursor-default">
+                        <div class="text-3xl mb-3">🛑</div>
+                        <h3 class="font-bold text-red-900 text-lg mb-2">Burocracia en Registro</h3>
+                        <p class="text-red-700 text-sm leading-relaxed">El requerimiento estricto de subir foto de licencia y cédula genera una barrera de entrada muy alta. La validación manual de cuotas retrasa el acceso entre 1 y 2 días.</p>
+                    </div>
+                    <div class="p-6 bg-orange-50 rounded-xl border border-orange-100 transition hover:-translate-y-1 hover:shadow-md cursor-default">
+                        <div class="text-3xl mb-3">📉</div>
+                        <h3 class="font-bold text-orange-900 text-lg mb-2">Percepción Negativa</h3>
+                        <p class="text-orange-700 text-sm leading-relaxed">Debido a la larga espera sin notificaciones claras, los agremiados asumen que la aplicación no funciona, es defectuosa o de mala calidad, abandonando el proceso.</p>
+                    </div>
+                    <div class="p-6 bg-slate-100 rounded-xl border border-slate-200 transition hover:-translate-y-1 hover:shadow-md cursor-default">
+                        <div class="text-3xl mb-3">🔄</div>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">Resistencia al Cambio</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed">Existe un hábito fuertemente arraigado de utilizar el correo electrónico para reportes. Si la app no demuestra ser drásticamente más rápida, no hay incentivo para migrar.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="estrategias" class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">3. Plan de Acción y Estrategias</h2>
+            <p class="text-slate-600 leading-relaxed mb-6">
+                Este módulo interactivo detalla las soluciones propuestas para revertir la baja adopción. Puede navegar por las diferentes pestañas para explorar tácticas de experiencia de usuario, incentivos, contenido educativo y técnicas de gamificación diseñadas para motivar a los agremiados.
+            </p>
+
+            <div class="flex flex-wrap gap-2 border-b border-slate-200 mb-6 pb-2" id="strategy-tabs">
+                <button class="px-4 py-2 font-semibold text-sm rounded-t-lg transition-colors bg-blue-600 text-white" data-target="ux">🚀 Optimización UX</button>
+                <button class="px-4 py-2 font-semibold text-sm rounded-t-lg transition-colors text-slate-500 hover:bg-slate-100" data-target="incentivos">🎁 Incentivos</button>
+                <button class="px-4 py-2 font-semibold text-sm rounded-t-lg transition-colors text-slate-500 hover:bg-slate-100" data-target="contenido">📹 Contenido</button>
+                <button class="px-4 py-2 font-semibold text-sm rounded-t-lg transition-colors text-slate-500 hover:bg-slate-100" data-target="gamificacion">⭐ Gamificación</button>
+            </div>
+
+            <div id="ux" class="tab-content active space-y-4">
+                <h3 class="text-xl font-bold text-blue-800">Mejoras en la Experiencia de Usuario</h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-3">
+                        <span class="text-blue-500 mt-1">✅</span>
+                        <div>
+                            <strong class="text-slate-800 block">Acceso de Invitado Inmediato</strong>
+                            <span class="text-slate-600 text-sm">Permitir descarga y navegación de noticias o manuales sin verificación. La validación solo ocurre para trámites críticos.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-blue-500 mt-1">✅</span>
+                        <div>
+                            <strong class="text-slate-800 block">Notificaciones de Estado Claras</strong>
+                            <span class="text-slate-600 text-sm">Eliminar la incertidumbre enviando alertas: "Verificando documentos. Te avisaremos en breve para que disfrutes todos los beneficios".</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-blue-500 mt-1">✅</span>
+                        <div>
+                            <strong class="text-slate-800 block">Sincronización Previa de Base de Datos</strong>
+                            <span class="text-slate-600 text-sm">Vincular registros existentes mediante SMS para automatizar la validación de cuotas al instante.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div id="incentivos" class="tab-content space-y-4">
+                <h3 class="text-xl font-bold text-blue-800">Generación de Valor Perceptible</h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-3">
+                        <span class="text-amber-500 mt-1">🎟️</span>
+                        <div>
+                            <strong class="text-slate-800 block">Fila Rápida (Trámite Express)</strong>
+                            <span class="text-slate-600 text-sm">Establecer política donde los reportes vía app se procesan prioritariamente frente a los enviados por correo.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-amber-500 mt-1">🎟️</span>
+                        <div>
+                            <strong class="text-slate-800 block">Alianzas Comerciales Exclusivas</strong>
+                            <span class="text-slate-600 text-sm">Ofrecer cupones de descuento directos en la app (ej. servicios de Car Care, herramientas) solo para usuarios registrados.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-amber-500 mt-1">🎟️</span>
+                        <div>
+                            <strong class="text-slate-800 block">Sorteos de Bienvenida</strong>
+                            <span class="text-slate-600 text-sm">Incentivar la descarga inmediata rifando equipos técnicos entre los usuarios activos del mes.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div id="contenido" class="tab-content space-y-4">
+                <h3 class="text-xl font-bold text-blue-800">Estrategia de Educación Digital</h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-3">
+                        <span class="text-purple-500 mt-1">📱</span>
+                        <div>
+                            <strong class="text-slate-800 block">Videos "Antes y Después"</strong>
+                            <span class="text-slate-600 text-sm">Mostrar el contraste real: 10 minutos redactando un correo vs. 30 segundos utilizando el asistente virtual de la app.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-purple-500 mt-1">📱</span>
+                        <div>
+                            <strong class="text-slate-800 block">Testimonios de Pioneros</strong>
+                            <span class="text-slate-600 text-sm">Casos de éxito cortos de los 400 usuarios actuales validando que la app les ahorra tiempo en su día a día.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-purple-500 mt-1">📱</span>
+                        <div>
+                            <strong class="text-slate-800 block">Micro-distribución en WhatsApp</strong>
+                            <span class="text-slate-600 text-sm">Difundir estos videos directamente en los grupos existentes donde el gremio ya está congregado y activo.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div id="gamificacion" class="tab-content space-y-4">
+                <h3 class="text-xl font-bold text-blue-800">Retención y Posicionamiento de Marca</h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-3">
+                        <span class="text-emerald-500 mt-1">🏆</span>
+                        <div>
+                            <strong class="text-slate-800 block">Niveles de Estatus (Bronce, Plata, Oro)</strong>
+                            <span class="text-slate-600 text-sm">Otorgar insignias basadas en el cumplimiento y uso de la app, desbloqueando respuestas más rápidas o beneficios.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-emerald-500 mt-1">🏆</span>
+                        <div>
+                            <strong class="text-slate-800 block">Re-branding del Asistente</strong>
+                            <span class="text-slate-600 text-sm">Posicionar el chatbot bajo la marca "Joe Codex" no como un robot automático, sino como un consultor técnico exclusivo en el bolsillo.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-emerald-500 mt-1">🏆</span>
+                        <div>
+                            <strong class="text-slate-800 block">Puntos por Reportes</strong>
+                            <span class="text-slate-600 text-sm">Cada trámite completado correctamente en la app suma puntos canjeables por descuentos en servicios.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="simulador" class="bg-slate-800 text-white p-6 md:p-8 rounded-2xl shadow-lg border border-slate-700">
+            <h2 class="text-2xl font-bold mb-2 text-white">4. Simulador de Impacto (Proyección)</h2>
+            <p class="text-slate-300 leading-relaxed mb-8">
+                Utilice esta herramienta interactiva para visualizar cómo la reducción del "Tiempo de Verificación" impacta directamente en el crecimiento proyectado de la base de usuarios a lo largo de tres meses. Modifique el control deslizante para observar cómo un proceso de validación más rápido mitiga el abandono y fomenta la adopción sostenida.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-5 bg-slate-900 p-6 rounded-xl border border-slate-700">
+                    <label for="frictionSlider" class="block text-sm font-semibold text-slate-300 mb-4">
+                        Tiempo de Verificación de Cuenta: <span id="sliderValue" class="text-2xl font-black text-amber-400 ml-2">48 Hrs</span>
+                    </label>
+                    <input type="range" id="frictionSlider" min="0" max="48" value="48" step="12" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                    
+                    <div class="flex justify-between text-xs text-slate-500 mt-2">
+                        <span>Instantáneo (0h)</span>
+                        <span>Actual (48h)</span>
+                    </div>
+
+                    <div class="mt-8 p-4 bg-slate-800 rounded-lg border border-slate-600">
+                        <h4 class="text-sm font-bold text-slate-400 uppercase mb-2">Conclusión del Modelo</h4>
+                        <p id="simulatorFeedback" class="text-sm text-slate-300">Con una espera de 48 horas, la tasa de abandono es altísima. El crecimiento proyectado es mínimo.</p>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 bg-white rounded-xl p-4">
+                    <div class="chart-container">
+                        <canvas id="projectionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center text-slate-400 text-sm mt-12 pb-8">
+        <p>Panel de Control y Arquitectura de Información interactiva.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('#strategy-tabs button');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => {
+                        t.classList.remove('bg-blue-600', 'text-white');
+                        t.classList.add('text-slate-500', 'hover:bg-slate-100');
+                    });
+                    
+                    tab.classList.remove('text-slate-500', 'hover:bg-slate-100');
+                    tab.classList.add('bg-blue-600', 'text-white');
+
+                    contents.forEach(c => c.classList.remove('active'));
+                    const target = tab.getAttribute('data-target');
+                    document.getElementById(target).classList.add('active');
+                });
+            });
+
+            const ctxDoughnut = document.getElementById('adoptionChart').getContext('2d');
+            new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Usuarios Activos', 'No Registrados / Abandonos'],
+                    datasets: [{
+                        data: [400, 1600],
+                        backgroundColor: ['#2563eb', '#e2e8f0'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { padding: 20, font: { family: 'system-ui' } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + ' agremiados';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            const ctxProjection = document.getElementById('projectionChart').getContext('2d');
+            const initialData = [400, 420, 450, 490]; 
+            
+            const projectionChart = new Chart(ctxProjection, {
+                type: 'line',
+                data: {
+                    labels: ['Mes Actual', 'Mes 1', 'Mes 2', 'Mes 3'],
+                    datasets: [{
+                        label: 'Proyección de Usuarios Activos',
+                        data: initialData,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#2563eb',
+                        pointRadius: 5,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 300,
+                            max: 2000,
+                            grid: { color: '#f1f5f9' },
+                            ticks: { font: { family: 'system-ui' } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'system-ui' } }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { font: { family: 'system-ui' } }
+                        }
+                    }
+                }
+            });
+
+            const slider = document.getElementById('frictionSlider');
+            const sliderValueDisplay = document.getElementById('sliderValue');
+            const feedbackDisplay = document.getElementById('simulatorFeedback');
+
+            slider.addEventListener('input', (e) => {
+                const waitTime = parseInt(e.target.value);
+                
+                if(waitTime === 0) {
+                    sliderValueDisplay.textContent = "Instantáneo";
+                } else {
+                    sliderValueDisplay.textContent = waitTime + " Hrs";
+                }
+
+                let newProjection = [];
+                let feedback = "";
+
+                if (waitTime === 48) {
+                    newProjection = [400, 420, 450, 490];
+                    feedback = "Con una espera de 48 horas, la tasa de abandono es altísima. El crecimiento proyectado es mínimo porque la percepción negativa se mantiene.";
+                    projectionChart.data.datasets[0].borderColor = '#ef4444'; 
+                    projectionChart.data.datasets[0].backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                    projectionChart.data.datasets[0].pointBackgroundColor = '#ef4444';
+                } else if (waitTime === 36) {
+                    newProjection = [400, 480, 560, 650];
+                    feedback = "Una ligera mejora en los tiempos de respuesta. Aún hay fricción, pero campañas de contenido pueden convencer a algunos rezagados.";
+                    projectionChart.data.datasets[0].borderColor = '#f59e0b';
+                    projectionChart.data.datasets[0].backgroundColor = 'rgba(245, 158, 11, 0.1)';
+                    projectionChart.data.datasets[0].pointBackgroundColor = '#f59e0b';
+                } else if (waitTime === 24) {
+                    newProjection = [400, 600, 850, 1100];
+                    feedback = "Reducir a 24 horas exactas con notificaciones push claras devuelve la confianza. El crecimiento empieza a ser exponencial si se añaden sorteos.";
+                    projectionChart.data.datasets[0].borderColor = '#3b82f6';
+                    projectionChart.data.datasets[0].backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                    projectionChart.data.datasets[0].pointBackgroundColor = '#3b82f6';
+                } else if (waitTime === 12) {
+                    newProjection = [400, 800, 1200, 1600];
+                    feedback = "Verificación en el mismo día. La experiencia del usuario es altamente positiva, facilitando el marketing de 'boca a boca' entre agremiados.";
+                    projectionChart.data.datasets[0].borderColor = '#10b981';
+                    projectionChart.data.datasets[0].backgroundColor = 'rgba(16, 185, 129, 0.1)';
+                    projectionChart.data.datasets[0].pointBackgroundColor = '#10b981';
+                } else if (waitTime === 0) {
+                    newProjection = [400, 1000, 1600, 1950];
+                    feedback = "Activación instantánea mediante base de datos previa o registro temporal. Elimina totalmente la barrera de entrada, permitiendo adopción masiva inmediata.";
+                    projectionChart.data.datasets[0].borderColor = '#22c55e';
+                    projectionChart.data.datasets[0].backgroundColor = 'rgba(34, 197, 94, 0.1)';
+                    projectionChart.data.datasets[0].pointBackgroundColor = '#22c55e';
+                }
+
+                projectionChart.data.datasets[0].data = newProjection;
+                projectionChart.update();
+                feedbackDisplay.textContent = feedback;
+            });
+        });
+    </script>
+</body>
+</html>
